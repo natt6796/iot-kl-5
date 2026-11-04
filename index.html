@@ -1,11 +1,179 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="th">
-<head>
-    <meta charset="UTF-8">
-    <title>เว็บไซต์แรกของฉัน</title>
-</head>
-<body>
-    <h1>สวัสดี ยินดีต้อนรับ!</h1>
-    <p>นี่คือเว็บไซต์แรกของฉัน</p>
-</body>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#fffaf5" />
+    <title>นาฉัน — ระบบติดตามสภาพดิน</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="./styles.css" />
+    <script src="./app.js" defer></script>
+  </head>
+  <body>
+    <section class="stage-gate" id="stage-gate" aria-labelledby="stage-gate-title">
+      <div class="stage-gate-shell">
+        <a class="brand gate-brand" href="#" aria-label="นาฉัน หน้าหลัก">
+          <span class="brand-mark" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none"><path d="M5 23c5-1 6-7 11-7s6 6 11 7M7 27c4-1 5-4 9-4s5 3 9 4M16 5v8m-4-4 4 4 4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M3 29h26" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></span>
+          <span class="brand-copy"><strong>นา<span>ฉัน</span></strong><small>SMART RICE FIELD</small></span>
+        </a>
+        <div class="gate-eyebrow"><span class="eyebrow-line"></span> SMART CROP TRACKING</div>
+        <h1 id="stage-gate-title" tabindex="-1">บันทึกวันปลูกครั้งเดียว<span>.</span></h1>
+        <p class="gate-intro">ระบบจะนับอายุข้าวและประเมินช่วงการเจริญเติบโตให้อัตโนมัติ เปิดเว็บครั้งต่อไปก็ดูระยะปัจจุบันได้เลย</p>
+        <div class="planting-setup-card">
+          <label for="planting-date">วันที่ปลูกหรือปักดำ</label>
+          <input id="planting-date" type="date" required />
+          <span class="planting-date-hint">บันทึกในเบราว์เซอร์นี้ · เปลี่ยนได้เมื่อเริ่มรอบปลูกใหม่</span>
+          <div class="date-error" id="date-error" role="alert" hidden></div>
+          <div class="stage-preview-grid" aria-label="ระบบจะประเมินช่วงจากอายุข้าว">
+            <div><img src="./images/ต้นอ่อน.jpg" alt="" /><span><strong>ต้นอ่อน</strong><small>0–20 วัน</small></span></div>
+            <div><img src="./images/แตกกอ.jpg" alt="" /><span><strong>แตกกอ</strong><small>20–50 วัน</small></span></div>
+            <div><img src="./images/ตั้งท้อง.png" alt="" /><span><strong>ตั้งท้อง</strong><small>50–100 วัน</small></span></div>
+            <div><img src="./images/ออกรวง.png" alt="" /><span><strong>ออกรวง</strong><small>80–100 วัน</small></span></div>
+            <div><img src="./images/สุกแก่.png" alt="" /><span><strong>สุกแก่</strong><small>100–120 วัน</small></span></div>
+          </div>
+          <div class="stage-overlap-note"><span>i</span><span>ระยะเป็นการประเมินจากวันปลูก ไม่ใช่การมองเห็นต้นข้าวด้วยกล้อง เมื่อช่วงวันซ้อนกัน ระบบใช้ลำดับประมาณ: ตั้งท้อง 50–79 วัน, ออกรวง 80–99 วัน และสุกแก่ตั้งแต่ 100 วัน ควรเทียบกับต้นจริง</span></div>
+          <button class="stage-continue" id="stage-continue" type="button">บันทึกวันปลูกและเริ่มติดตาม <span>→</span></button>
+          <button class="stage-cancel" id="cancel-date-edit" type="button" hidden>ยกเลิก · ใช้วันปลูกเดิม</button>
+        </div>
+        <p class="gate-footnote">วันปลูกจะถูกจำไว้ในเบราว์เซอร์เครื่องนี้ · แนวทางการเจริญเติบโตเป็นค่าประมาณ</p>
+      </div>
+    </section>
+    <div class="app-shell" id="app-shell" hidden>
+      <aside class="sidebar">
+        <a class="brand" href="#overview" aria-label="นาฉัน หน้าหลัก">
+          <span class="brand-mark" aria-hidden="true">
+            <svg viewBox="0 0 32 32" fill="none"><path d="M5 23c5-1 6-7 11-7s6 6 11 7M7 27c4-1 5-4 9-4s5 3 9 4M16 5v8m-4-4 4 4 4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M3 29h26" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+          </span>
+          <span class="brand-copy"><strong>นา<span>ฉัน</span></strong><small>SMART RICE FIELD</small></span>
+        </a>
+        <nav class="main-nav" aria-label="เมนูหลัก">
+          <a class="nav-link active" href="#overview"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="7" height="8" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="15" width="7" height="6" rx="1.5"/></svg><span>ภาพรวม</span></a>
+          <a class="nav-link" href="#sensors"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v3m0 12v3M5.64 5.64l2.12 2.12m8.48 8.48 2.12 2.12M3 12h3m12 0h3m-2.36-6.36-2.12 2.12m-8.48 8.48-2.12 2.12"/><circle cx="12" cy="12" r="5"/></svg><span>เซ็นเซอร์</span><span class="nav-count">05</span></a>
+          <a class="nav-link" href="#history"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12a9 9 0 1 0 2.6-6.4L3 8m0-5v5h5m4-2v6l4 2"/></svg><span>ประวัติข้อมูล</span></a>
+        </nav>
+        <div class="sidebar-bottom">
+          <div class="season-card"><span class="season-icon">✳</span><div><small>ช่วงข้าวปัจจุบัน</small><strong id="season-stage-name">รอวันปลูก</strong></div><span class="season-state">อัตโนมัติ</span></div>
+          <div class="sidebar-note"><span class="note-icon">i</span><span>ข้อมูลเซ็นเซอร์เป็นค่าประมาณ ควรตรวจสอบกับสภาพแปลงจริง</span></div>
+          <div class="profile"><div class="avatar">ช</div><div class="profile-copy"><strong>เจ้าของแปลง</strong></div><span class="profile-menu">···</span></div>
+        </div>
+      </aside>
+
+      <main class="main-content" id="overview">
+        <header class="topbar">
+          <div class="breadcrumbs"><span>แปลงนาของฉัน</span><span class="crumb-separator">/</span><strong>ภาพรวม</strong></div>
+          <div class="topbar-actions"><div class="live-clock"><span class="clock-dot"></span><span id="current-time">--:--:--</span></div><button class="stage-change-button" id="change-stage" type="button">แก้วันปลูก</button><button class="icon-button" id="refresh-data" type="button" aria-label="รีเฟรชข้อมูล" title="รีเฟรชข้อมูล"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 7v5h-5M4 17v-5h5"/><path d="M5.6 9a7 7 0 0 1 11.6-2L20 12M4 12l2.8 5a7 7 0 0 0 11.6-2"/></svg></button><button class="connect-button" id="connect-serial" type="button" title="ใช้ USB Serial แทน Wi-Fi"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 7V4m8 3V4M7 7h10v5a5 5 0 0 1-10 0V7Zm5 10v3m-4 0h8"/></svg><span id="connect-label">เชื่อมต่อ USB</span></button></div>
+        </header>
+
+        <div class="page-content">
+          <section class="page-heading">
+            <div><div class="eyebrow"><span class="eyebrow-line"></span> FIELD CONDITIONS <span class="heading-date" id="today-date"></span></div><h1>สวัสดี, เกษตรกร<span class="heading-period">.</span></h1><p>ภาพรวมสภาพดินในแปลงนาของคุณ ณ ตอนนี้</p><button class="selected-stage-chip" id="selected-stage-chip" type="button" aria-label="แก้ไขวันปลูกและช่วงการเจริญเติบโต"><span class="selected-stage-dot"></span><span id="selected-stage-name">ยังไม่ได้เลือกช่วง</span><span id="selected-stage-days"></span><span class="chip-edit">แก้ไข</span></button></div>
+            <div class="connection-pill demo-pill" id="connection-pill"><span class="status-pulse"></span><span id="connection-label-status">โหมดตัวอย่าง</span><span class="pill-separator"></span><span class="pill-subtitle" id="connection-detail">ข้อมูลจำลอง</span></div>
+          </section>
+
+          <section class="notice-banner" id="sensor-alert" aria-live="polite">
+            <span class="notice-icon" id="alert-icon">✓</span>
+            <span class="notice-copy"><strong id="alert-title">แปลงนาของคุณพร้อมติดตาม</strong><span id="alert-detail">ข้อมูลจากเซ็นเซอร์จะแสดงที่นี่เมื่อเชื่อมต่อ Arduino</span></span>
+            <span class="notice-time" id="alert-time">อัปเดตล่าสุด --:--</span>
+          </section>
+
+          <section class="panel stage-guidance" aria-labelledby="stage-guidance-title">
+            <div class="panel-heading guidance-heading"><div><div class="panel-kicker">GROWTH-STAGE FIELD NOTES</div><h2 id="stage-guidance-title">แนวทางดูแลช่วงนี้</h2></div><span class="guidance-badge" id="guidance-stage-badge"></span></div>
+            <div class="stage-image-panel"><img id="stage-image" src="./images/ต้นอ่อน.jpg" alt="ภาพถ่ายต้นกล้าข้าวระยะต้นอ่อน" /><div><span class="image-caption-kicker">RICE GROWTH GUIDE</span><strong id="stage-image-title">ต้นอ่อน</strong><p id="stage-image-caption">ภาพประกอบระยะการเจริญเติบโตโดยประมาณ</p></div><span class="crop-age-badge" id="crop-age-badge">ปลูกแล้ว 0 วัน</span></div>
+            <p class="stage-age-note" id="stage-age-note"></p>
+            <div class="stage-guidance-grid">
+              <article class="stage-guidance-item"><span class="guidance-icon">◉</span><div><strong>จัดการน้ำและดิน</strong><p id="stage-water-advice"></p></div></article>
+              <article class="stage-guidance-item"><span class="guidance-icon nutrient-guide-icon">✳</span><div><strong>การดูแลธาตุอาหาร</strong><p id="stage-nutrient-advice"></p></div></article>
+              <article class="stage-guidance-item"><span class="guidance-icon observe-guide-icon">⌕</span><div><strong>สิ่งที่ควรสังเกต</strong><p id="stage-observe-advice"></p></div></article>
+            </div>
+          </section>
+
+          <section class="overview-grid" aria-label="สรุปสภาพดิน">
+            <article class="overview-card moisture-summary">
+              <div class="card-top"><span class="metric-label">ความชื้นดินเฉลี่ย</span><span class="metric-icon moisture-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 3.5s7 7.1 7 12a7 7 0 0 1-14 0c0-4.9 7-12 7-12Z"/><path d="M9 16.5a3 3 0 0 0 3 3"/></svg></span></div>
+              <div class="summary-value"><span id="average-moisture">--</span><span class="summary-unit">%</span></div>
+              <div class="metric-foot"><span class="foot-dot green-dot"></span><span id="moisture-summary-note">รอข้อมูลจากเซ็นเซอร์</span></div>
+              <div class="mini-bars" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+            </article>
+            <article class="overview-card ph-summary">
+              <div class="card-top"><span class="metric-label">ค่า pH ดิน</span><span class="metric-icon ph-icon" aria-hidden="true"><span>pH</span></span></div>
+              <div class="summary-value"><span id="soil-ph">--.-</span><span class="summary-unit">pH</span></div>
+              <div class="metric-foot"><span class="foot-dot purple-dot"></span><span id="ph-note">รอข้อมูลจากเซ็นเซอร์</span></div>
+              <div class="ph-scale" aria-hidden="true"><span></span></div>
+            </article>
+            <article class="overview-card nutrients-summary">
+              <div class="card-top"><span class="metric-label">ธาตุอาหาร N · P · K</span><span class="metric-icon npk-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m12 3 8 4.5v9L12 21l-8-4.5v-9L12 3Z"/><path d="m4 7.5 8 4.6 8-4.6M12 12v9"/></svg></span></div>
+              <div class="npk-values"><div><strong id="nitrogen">--</strong><span>N</span></div><i></i><div><strong id="phosphorus">--</strong><span>P</span></div><i></i><div><strong id="potassium">--</strong><span>K</span></div></div>
+              <div class="metric-foot"><span class="foot-dot orange-dot"></span><span id="npk-note">หน่วยตามการปรับเทียบเซ็นเซอร์</span></div>
+              <div class="nutrient-bars" aria-hidden="true"><span></span><span></span><span></span></div>
+            </article>
+            <article class="overview-card sensors-summary">
+              <div class="card-top"><span class="metric-label">เซ็นเซอร์ออนไลน์</span><span class="metric-icon online-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="M8.5 12.5 11 15l5-6"/></svg></span></div>
+              <div class="summary-value"><span id="online-count">0</span><span class="summary-unit">/ 5 เซ็นเซอร์</span></div>
+              <div class="metric-foot"><span class="foot-dot green-dot"></span><span id="online-note">รอเชื่อมต่อบอร์ด</span></div>
+              <div class="online-meter"><span id="online-meter-fill"></span></div>
+            </article>
+          </section>
+
+          <section class="main-grid">
+            <article class="panel field-panel" id="sensors">
+              <div class="panel-heading"><div><div class="panel-kicker">SENSOR MAP</div><h2>ตรวจวัดค่า <span class="live-tag"><i></i> LIVE</span></h2></div></div>
+              <div class="field-map" role="img" aria-label="แผนผังหัววัดความชื้นที่ความลึก 5, 10, 15 และ 20 เซนติเมตร และหัววัด NPK กับ pH">
+                <div class="map-grid" aria-hidden="true"></div>
+                <div class="field-boundary"><div class="field-row field-row-one">
+                  <button class="sensor-marker moisture-marker" data-sensor="moisture-1" type="button" aria-label="ความชื้นที่ความลึก 5 เซนติเมตร"><span class="marker-pulse"></span><strong>ความชื้น 5 cm</strong><small id="map-moisture-1">--%</small></button>
+                  <button class="sensor-marker moisture-marker" data-sensor="moisture-2" type="button" aria-label="ความชื้นที่ความลึก 10 เซนติเมตร"><span class="marker-pulse"></span><strong>ความชื้น 10 cm</strong><small id="map-moisture-2">--%</small></button>
+                </div><div class="field-row field-row-two">
+                  <button class="sensor-marker chemistry-marker" data-sensor="chemistry" type="button" aria-label="ค่า NPK และ pH"><span class="marker-pulse"></span><strong>NPK + pH</strong><small id="map-chemistry">N -- · P --</small><small id="map-ph">K -- · pH --.-</small></button>
+                  <button class="sensor-marker moisture-marker" data-sensor="moisture-3" type="button" aria-label="ความชื้นที่ความลึก 15 เซนติเมตร"><span class="marker-pulse"></span><strong>ความชื้น 15 cm</strong><small id="map-moisture-3">--%</small></button>
+                </div><div class="field-row field-row-three">
+                  <span class="map-watermark">RICE FIELD · ZONE A</span>
+                  <button class="sensor-marker moisture-marker" data-sensor="moisture-4" type="button" aria-label="ความชื้นที่ความลึก 20 เซนติเมตร"><span class="marker-pulse"></span><strong>ความชื้น 20 cm</strong><small id="map-moisture-4">--%</small></button>
+                </div></div>
+                <div class="map-compass"><span>N</span><i>↑</i></div>
+              </div>
+              <div class="map-legend"><span><i class="legend-dot moisture-legend"></i>ความชื้นดิน <strong>4 ระดับ · 5–20 cm</strong></span><span><i class="legend-dot chemistry-legend"></i>ค่า NPK + pH <strong>1 ชุด</strong></span></div>
+            </article>
+
+            <article class="panel chart-panel" id="history">
+              <div class="panel-heading"><div><div class="panel-kicker">SOIL MOISTURE HISTORY</div><h2>แนวโน้มความชื้นดิน</h2></div><select id="chart-range" aria-label="เลือกช่วงเวลา"><option value="1">60 นาที</option><option value="6">6 ชั่วโมง</option></select></div>
+              <div class="chart-legend"><span><i class="legend-line line-one"></i>5 cm</span><span><i class="legend-line line-two"></i>10 cm</span><span><i class="legend-line line-three"></i>15 cm</span><span><i class="legend-line line-four"></i>20 cm</span></div>
+              <div class="chart-wrap"><div class="chart-y-labels" aria-hidden="true"><span>100%</span><span>75%</span><span>50%</span><span>25%</span><span>0%</span></div><canvas id="moisture-chart" aria-label="กราฟประวัติความชื้นดินทั้งสี่จุด"></canvas></div>
+              <div class="chart-x-labels" id="chart-x-labels" aria-hidden="true"><span>60 นาทีที่แล้ว</span><span>45 นาที</span><span>30 นาที</span><span>15 นาที</span><span>ตอนนี้</span></div>
+              <div class="chart-footer"><span class="chart-footer-dot"></span><span id="chart-status">กำลังแสดงข้อมูลตัวอย่าง</span><span class="chart-updated" id="last-updated">อัปเดตเมื่อ --:--:--</span></div>
+            </article>
+          </section>
+
+          <section class="panel soil-advice-panel" id="soil-advice">
+            <div class="panel-heading advice-heading"><div><div class="panel-kicker">SOIL TEST & PRACTICAL ADVICE</div><h2>อ่านค่าสภาพดินและแนวทางแก้ไข</h2></div><span class="advice-badge">คำแนะนำทั่วไป · ไม่ระบุอัตราปุ๋ย</span></div>
+            <div class="ph-advice-card">
+              <div class="ph-advice-value"><span class="advice-mini-icon ph-mini">pH</span><span><strong>ความเป็นกรด–ด่าง</strong><small>ค่าเซ็นเซอร์ปัจจุบัน: <b id="advice-ph-value">--.-</b></small></span><span class="advice-status" id="advice-ph-status">รอข้อมูล</span></div>
+              <p id="advice-ph-text">pH ช่วยชี้เบื้องต้นเรื่องความเป็นกรด–ด่าง ควรตรวจยืนยันด้วยชุดตรวจหรือห้องปฏิบัติการก่อนปรับดิน</p>
+            </div>
+            <div class="npk-advice-grid">
+              <article class="npk-advice-card" data-nutrient="n"><div class="npk-advice-title"><span class="advice-mini-icon n-mini">N</span><div><strong>ไนโตรเจน (N)</strong><small id="raw-n-value">ค่าจากบอร์ด: -- · ยังไม่ทราบหน่วย</small></div></div><label class="sr-only" for="status-n">สถานะไนโตรเจนจากผลตรวจดิน</label><select class="nutrient-status-select" id="status-n"><option value="unknown">ยังไม่ทราบ</option><option value="low">ผลตรวจระบุว่าต่ำ</option><option value="adequate">อยู่ในเกณฑ์</option><option value="high">ผลตรวจระบุว่าสูง</option></select><p class="npk-advice-text" id="advice-n-text"></p></article>
+              <article class="npk-advice-card" data-nutrient="p"><div class="npk-advice-title"><span class="advice-mini-icon p-mini">P</span><div><strong>ฟอสฟอรัส (P)</strong><small id="raw-p-value">ค่าจากบอร์ด: -- · ยังไม่ทราบหน่วย</small></div></div><label class="sr-only" for="status-p">สถานะฟอสฟอรัสจากผลตรวจดิน</label><select class="nutrient-status-select" id="status-p"><option value="unknown">ยังไม่ทราบ</option><option value="low">ผลตรวจระบุว่าต่ำ</option><option value="adequate">อยู่ในเกณฑ์</option><option value="high">ผลตรวจระบุว่าสูง</option></select><p class="npk-advice-text" id="advice-p-text"></p></article>
+              <article class="npk-advice-card" data-nutrient="k"><div class="npk-advice-title"><span class="advice-mini-icon k-mini">K</span><div><strong>โพแทสเซียม (K)</strong><small id="raw-k-value">ค่าจากบอร์ด: -- · ยังไม่ทราบหน่วย</small></div></div><label class="sr-only" for="status-k">สถานะโพแทสเซียมจากผลตรวจดิน</label><select class="nutrient-status-select" id="status-k"><option value="unknown">ยังไม่ทราบ</option><option value="low">ผลตรวจระบุว่าต่ำ</option><option value="adequate">อยู่ในเกณฑ์</option><option value="high">ผลตรวจระบุว่าสูง</option></select><p class="npk-advice-text" id="advice-k-text"></p></article>
+            </div>
+            <div class="advice-safety-note"><span>!</span><p><strong>ก่อนปรับ pH หรือใส่ปุ๋ย:</strong> ค่า NPK จากโมดูลแต่ละรุ่นอาจใช้หน่วย/วิธีวัดต่างกัน จึงไม่จัดประเภทขาด–เกินจากตัวเลขเซ็นเซอร์เพียงอย่างเดียว เลือกสถานะ N/P/K จากผลวิเคราะห์ดินและคำแนะนำสำหรับพันธุ์ข้าวกับพื้นที่ของคุณ ห้ามคำนวณอัตราปูนหรือปุ๋ยจากค่าเหล่านี้โดยตรง ค่าเตือนความชื้น 35% เป็นเกณฑ์ตัวอย่าง ต้องปรับตามการสอบเทียบหัววัดและสภาพดิน</p></div>
+          </section>
+
+          <section class="panel readings-panel">
+            <div class="panel-heading readings-heading"><div><div class="panel-kicker">LIVE SENSOR READINGS</div><h2>ค่าจากเซ็นเซอร์ <span class="heading-count">5</span></h2></div><span class="units-note">ค่าความชื้นเป็น % · NPK เป็นหน่วยตามโมดูล</span></div>
+            <div class="readings-grid" id="readings-grid">
+              <article class="reading-card" data-reading="moisture-1"><div class="reading-top"><span class="reading-name"><i class="reading-icon moisture-small">◉</i><span><strong>ความชื้น</strong><small>ความลึก 5 cm</small></span></span><span class="reading-status online">ออนไลน์</span></div><div class="reading-value"><strong id="reading-moisture-1">--</strong><span>%</span></div><div class="reading-track"><i></i></div><div class="reading-foot"><span>หัววัด 5 cm</span><span id="reading-time-1">--:--:--</span></div></article>
+              <article class="reading-card" data-reading="moisture-2"><div class="reading-top"><span class="reading-name"><i class="reading-icon moisture-small">◉</i><span><strong>ความชื้น</strong><small>ความลึก 10 cm</small></span></span><span class="reading-status online">ออนไลน์</span></div><div class="reading-value"><strong id="reading-moisture-2">--</strong><span>%</span></div><div class="reading-track"><i></i></div><div class="reading-foot"><span>หัววัด 10 cm</span><span id="reading-time-2">--:--:--</span></div></article>
+              <article class="reading-card" data-reading="moisture-3"><div class="reading-top"><span class="reading-name"><i class="reading-icon moisture-small">◉</i><span><strong>ความชื้น</strong><small>ความลึก 15 cm</small></span></span><span class="reading-status online">ออนไลน์</span></div><div class="reading-value"><strong id="reading-moisture-3">--</strong><span>%</span></div><div class="reading-track"><i></i></div><div class="reading-foot"><span>หัววัด 15 cm</span><span id="reading-time-3">--:--:--</span></div></article>
+              <article class="reading-card" data-reading="moisture-4"><div class="reading-top"><span class="reading-name"><i class="reading-icon moisture-small">◉</i><span><strong>ความชื้น</strong><small>ความลึก 20 cm</small></span></span><span class="reading-status online">ออนไลน์</span></div><div class="reading-value"><strong id="reading-moisture-4">--</strong><span>%</span></div><div class="reading-track"><i></i></div><div class="reading-foot"><span>หัววัด 20 cm</span><span id="reading-time-4">--:--:--</span></div></article>
+              <article class="reading-card chemistry-reading" data-reading="chemistry"><div class="reading-top"><span class="reading-name"><i class="reading-icon chemistry-small">NPK</i><span><strong>NPK + pH</strong><small>แสดงค่าแยกตามรายการ</small></span></span><span class="reading-status online">ออนไลน์</span></div><div class="chemistry-reading-values"><div><small>ไนโตรเจน · N</small><strong id="reading-n">--</strong></div><div><small>ฟอสฟอรัส · P</small><strong id="reading-p">--</strong></div><div><small>โพแทสเซียม · K</small><strong id="reading-k">--</strong></div><div><small>กรด–ด่าง · pH</small><strong id="reading-ph">--.-</strong></div></div><div class="reading-track chemistry-track"><i></i></div><div class="reading-foot"><span>หน่วย NPK ตามโมดูล</span><span id="reading-time-ph">--:--:--</span></div></article>
+            </div>
+            <div class="readings-footer"><span id="readings-count">แสดงเซ็นเซอร์ 5 ชุด</span><span>เช็กการปรับเทียบหัววัดตามคำแนะนำผู้ผลิต</span></div>
+          </section>
+          <footer class="page-footer"><span><span class="footer-mark">◈</span> นาฉัน <span class="footer-divider">·</span> ระบบติดตามสภาพดินในนาข้าว</span><span>ข้อมูลสาธิตไม่ใช่คำแนะนำการใส่ปุ๋ย</span></footer>
+        </div>
+      </main>
+    </div>
+    <div class="toast-region" id="toast-region" aria-live="polite" aria-atomic="true"></div>
+  </body>
 </html>

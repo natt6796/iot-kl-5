@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 280 150" fill="none">
+  <rect width="280" height="150" rx="14" fill="#FFF1DD"/>
+  <circle cx="228" cy="36" r="19" fill="#F4D09C"/>
+  <path d="M0 108c44-7 78 6 119 0 46-7 99-7 161 0v42H0v-42Z" fill="#CB9861"/>
+  <path d="M0 116c44-6 77 6 119 0 52-7 104-6 161 0" stroke="#AD7042" stroke-width="2"/>
+  <path d="M137 110c0-35 1-61 0-82m0 59c-15-21-29-30-47-28 10 16 26 27 47 31m1-18c12-22 27-32 43-31-7 18-21 29-43 37m0-17c-5-18-15-28-30-34 1 16 11 29 30 41" stroke="#788846" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M137 42c8-9 18-14 29-14m-29 18c13-9 25-12 37-10m-37 16c15-7 27-8 39-5m-39 12c15-4 26-3 37 1" stroke="#BA8A3B" stroke-width="2" stroke-linecap="round"/>
+  <path d="M166 25c6 0 9 3 9 8m-22-5c6 0 9 3 9 8m-20-1c6 0 9 3 9 8m19 2c6 0 9 3 9 8m-27-5c6 0 9 3 9 8" fill="#E8C46C" stroke="#C29445" stroke-width="1.5" stroke-linecap="round"/>
+  <path d="M137 110c-9 9-13 19-14 30m15-21 13 22m-15-13-18 10m19-7 18 9m-18-3-10 12m10-10 13 10" stroke="#E8D2B3" stroke-width="2.5" stroke-linecap="round"/>
+  <path d="M53 109c16-4 26-2 38 1m108 0c14-3 23-1 35 2" stroke="#E5BD75" stroke-width="2" stroke-linecap="round"/>
+  <text x="18" y="28" fill="#A96532" font-family="sans-serif" font-size="9" font-weight="700" letter-spacing="2">05 · RIPENING</text>
+</svg>

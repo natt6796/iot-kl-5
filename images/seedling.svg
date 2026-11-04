@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 280 150" fill="none">
+  <rect width="280" height="150" rx="14" fill="#FFF2E3"/>
+  <circle cx="228" cy="38" r="19" fill="#F7D9B6"/>
+  <path d="M0 104c45-8 71 7 115 0 42-7 101-9 165 0v46H0v-46Z" fill="#D9A46E"/>
+  <path d="M0 112c42-6 74 7 117 0 53-8 104-6 163 0" stroke="#BC7D4A" stroke-width="2"/>
+  <path d="M0 122c37-4 72 6 108 1m32-1c42-5 85 5 140 0" stroke="#E8BE8F" stroke-width="2" stroke-linecap="round"/>
+  <path d="M133 108c0-20 1-37 0-58m-1 48c-15-17-26-21-39-19 10 14 22 21 39 22m1-24c11-18 22-24 34-24-5 16-17 25-34 30m0-14c-8-13-17-18-28-19 4 12 13 19 28 24" stroke="#658E4D" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M133 108v22m-1-12-10 10m11-7 10 9m-11-3-7 9m7-7 8 8" stroke="#F4E2C8" stroke-width="2.5" stroke-linecap="round"/>
+  <path d="M63 105c16-3 25-1 37 2m91 0c16-3 25-1 37 2" stroke="#A8C77A" stroke-width="2" stroke-linecap="round"/>
+  <text x="18" y="28" fill="#A96532" font-family="sans-serif" font-size="9" font-weight="700" letter-spacing="2">01 · SEEDLING</text>
+</svg>
