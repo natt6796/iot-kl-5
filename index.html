@@ -3,60 +3,57 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="theme-color" content="#fffaf5" />
-    <title>นาฉัน — ระบบติดตามสภาพดิน</title>
+    <meta name="theme-color" content="#f4f7f4" />
+    <title>โรงเรียนกงไกรลาศวิทยา — ระบบติดตามสภาพดิน</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="./styles.css" />
-    <script src="./app.js" defer></script>
+    <link rel="stylesheet" href="./styles.css?v=soil-sensor-guide" />
+    <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/4.0.0/model-viewer.min.js"></script>
+    <script src="./app.js?v=npk-ph-sensor-guide" defer></script>
   </head>
   <body>
     <section class="stage-gate" id="stage-gate" aria-labelledby="stage-gate-title">
+      <div class="gate-zoom-scene" aria-hidden="true">
+        <div class="gate-stars"></div>
+        <div class="gate-earth"><span></span></div>
+        <div class="gate-field">
+          <div class="gate-field-glow"></div>
+          <div class="gate-field-rows"></div>
+          <div class="gate-field-horizon"></div>
+        </div>
+      </div>
       <div class="stage-gate-shell">
-        <a class="brand gate-brand" href="#" aria-label="นาฉัน หน้าหลัก">
-          <span class="brand-mark" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none"><path d="M5 23c5-1 6-7 11-7s6 6 11 7M7 27c4-1 5-4 9-4s5 3 9 4M16 5v8m-4-4 4 4 4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M3 29h26" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></span>
-          <span class="brand-copy"><strong>นา<span>ฉัน</span></strong><small>SMART RICE FIELD</small></span>
+        <a class="brand gate-brand" href="#" aria-label="โรงเรียนกงไกราศวิทยา หน้าหลัก">
+          <span class="brand-mark" aria-hidden="true"><img src="./images/school-logo.png" alt="" /></span>
+          <span class="brand-copy"><strong>โรงเรียนกงไกรลาศวิทยา</strong><small>SMART RICE FIELD</small></span>
         </a>
-        <div class="gate-eyebrow"><span class="eyebrow-line"></span> SMART CROP TRACKING</div>
-        <h1 id="stage-gate-title" tabindex="-1">บันทึกวันปลูกครั้งเดียว<span>.</span></h1>
-        <p class="gate-intro">ระบบจะนับอายุข้าวและประเมินช่วงการเจริญเติบโตให้อัตโนมัติ เปิดเว็บครั้งต่อไปก็ดูระยะปัจจุบันได้เลย</p>
+        <div class="gate-eyebrow"><span class="eyebrow-line"></span> SMART RICE FIELD</div>
+        <h1 id="stage-gate-title" tabindex="-1">ยินดีต้อนรับ<span>สู่</span><br />แปลงนาของคุณ</h1>
+        <p class="gate-intro">เริ่มต้นติดตามการเติบโตของข้าว</p>
         <div class="planting-setup-card">
           <label for="planting-date">วันที่ปลูกหรือปักดำ</label>
           <input id="planting-date" type="date" required />
-          <span class="planting-date-hint">บันทึกในเบราว์เซอร์นี้ · เปลี่ยนได้เมื่อเริ่มรอบปลูกใหม่</span>
           <div class="date-error" id="date-error" role="alert" hidden></div>
-          <div class="stage-preview-grid" aria-label="ระบบจะประเมินช่วงจากอายุข้าว">
-            <div><img src="./images/ต้นอ่อน.jpg" alt="" /><span><strong>ต้นอ่อน</strong><small>0–20 วัน</small></span></div>
-            <div><img src="./images/แตกกอ.jpg" alt="" /><span><strong>แตกกอ</strong><small>20–50 วัน</small></span></div>
-            <div><img src="./images/ตั้งท้อง.png" alt="" /><span><strong>ตั้งท้อง</strong><small>50–100 วัน</small></span></div>
-            <div><img src="./images/ออกรวง.png" alt="" /><span><strong>ออกรวง</strong><small>80–100 วัน</small></span></div>
-            <div><img src="./images/สุกแก่.png" alt="" /><span><strong>สุกแก่</strong><small>100–120 วัน</small></span></div>
-          </div>
-          <div class="stage-overlap-note"><span>i</span><span>ระยะเป็นการประเมินจากวันปลูก ไม่ใช่การมองเห็นต้นข้าวด้วยกล้อง เมื่อช่วงวันซ้อนกัน ระบบใช้ลำดับประมาณ: ตั้งท้อง 50–79 วัน, ออกรวง 80–99 วัน และสุกแก่ตั้งแต่ 100 วัน ควรเทียบกับต้นจริง</span></div>
           <button class="stage-continue" id="stage-continue" type="button">บันทึกวันปลูกและเริ่มติดตาม <span>→</span></button>
           <button class="stage-cancel" id="cancel-date-edit" type="button" hidden>ยกเลิก · ใช้วันปลูกเดิม</button>
         </div>
-        <p class="gate-footnote">วันปลูกจะถูกจำไว้ในเบราว์เซอร์เครื่องนี้ · แนวทางการเจริญเติบโตเป็นค่าประมาณ</p>
+        <p class="gate-footnote">บันทึกวันปลูกครั้งเดียว · พร้อมเริ่มดูแลนา</p>
       </div>
     </section>
     <div class="app-shell" id="app-shell" hidden>
       <aside class="sidebar">
-        <a class="brand" href="#overview" aria-label="นาฉัน หน้าหลัก">
-          <span class="brand-mark" aria-hidden="true">
-            <svg viewBox="0 0 32 32" fill="none"><path d="M5 23c5-1 6-7 11-7s6 6 11 7M7 27c4-1 5-4 9-4s5 3 9 4M16 5v8m-4-4 4 4 4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M3 29h26" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-          </span>
-          <span class="brand-copy"><strong>นา<span>ฉัน</span></strong><small>SMART RICE FIELD</small></span>
+        <a class="brand" href="#overview" aria-label="โรงเรียนกงไกรลาศวิทยา หน้าหลัก">
+          <span class="brand-mark" aria-hidden="true"><img src="./images/school-logo.png" alt="" /></span>
+          <span class="brand-copy"><strong>โรงเรียนกงไกรลาศวิทยา</strong><small>SMART RICE FIELD</small></span>
         </a>
         <nav class="main-nav" aria-label="เมนูหลัก">
           <a class="nav-link active" href="#overview"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="7" height="8" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="15" width="7" height="6" rx="1.5"/></svg><span>ภาพรวม</span></a>
           <a class="nav-link" href="#sensors"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v3m0 12v3M5.64 5.64l2.12 2.12m8.48 8.48 2.12 2.12M3 12h3m12 0h3m-2.36-6.36-2.12 2.12m-8.48 8.48-2.12 2.12"/><circle cx="12" cy="12" r="5"/></svg><span>เซ็นเซอร์</span><span class="nav-count">05</span></a>
-          <a class="nav-link" href="#history"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12a9 9 0 1 0 2.6-6.4L3 8m0-5v5h5m4-2v6l4 2"/></svg><span>ประวัติข้อมูล</span></a>
         </nav>
         <div class="sidebar-bottom">
           <div class="season-card"><span class="season-icon">✳</span><div><small>ช่วงข้าวปัจจุบัน</small><strong id="season-stage-name">รอวันปลูก</strong></div><span class="season-state">อัตโนมัติ</span></div>
           <div class="sidebar-note"><span class="note-icon">i</span><span>ข้อมูลเซ็นเซอร์เป็นค่าประมาณ ควรตรวจสอบกับสภาพแปลงจริง</span></div>
-          <div class="profile"><div class="avatar">ช</div><div class="profile-copy"><strong>เจ้าของแปลง</strong></div><span class="profile-menu">···</span></div>
         </div>
       </aside>
 
@@ -118,43 +115,56 @@
 
           <section class="main-grid">
             <article class="panel field-panel" id="sensors">
-              <div class="panel-heading"><div><div class="panel-kicker">SENSOR MAP</div><h2>ตรวจวัดค่า <span class="live-tag"><i></i> LIVE</span></h2></div></div>
-              <div class="field-map" role="img" aria-label="แผนผังหัววัดความชื้นที่ความลึก 5, 10, 15 และ 20 เซนติเมตร และหัววัด NPK กับ pH">
-                <div class="map-grid" aria-hidden="true"></div>
-                <div class="field-boundary"><div class="field-row field-row-one">
-                  <button class="sensor-marker moisture-marker" data-sensor="moisture-1" type="button" aria-label="ความชื้นที่ความลึก 5 เซนติเมตร"><span class="marker-pulse"></span><strong>ความชื้น 5 cm</strong><small id="map-moisture-1">--%</small></button>
-                  <button class="sensor-marker moisture-marker" data-sensor="moisture-2" type="button" aria-label="ความชื้นที่ความลึก 10 เซนติเมตร"><span class="marker-pulse"></span><strong>ความชื้น 10 cm</strong><small id="map-moisture-2">--%</small></button>
-                </div><div class="field-row field-row-two">
-                  <button class="sensor-marker chemistry-marker" data-sensor="chemistry" type="button" aria-label="ค่า NPK และ pH"><span class="marker-pulse"></span><strong>NPK + pH</strong><small id="map-chemistry">N -- · P --</small><small id="map-ph">K -- · pH --.-</small></button>
-                  <button class="sensor-marker moisture-marker" data-sensor="moisture-3" type="button" aria-label="ความชื้นที่ความลึก 15 เซนติเมตร"><span class="marker-pulse"></span><strong>ความชื้น 15 cm</strong><small id="map-moisture-3">--%</small></button>
-                </div><div class="field-row field-row-three">
-                  <span class="map-watermark">RICE FIELD · ZONE A</span>
-                  <button class="sensor-marker moisture-marker" data-sensor="moisture-4" type="button" aria-label="ความชื้นที่ความลึก 20 เซนติเมตร"><span class="marker-pulse"></span><strong>ความชื้น 20 cm</strong><small id="map-moisture-4">--%</small></button>
-                </div></div>
-                <div class="map-compass"><span>N</span><i>↑</i></div>
+              <div class="panel-heading"><div><div class="panel-kicker">FIELD MODEL</div><h2>โมเดล</h2></div></div>
+              <div class="field-map">
+                <model-viewer class="field-model" src="./models/rice-field.glb" alt="โมเดลแปลงนาสามมิติ" camera-controls disable-pan interaction-prompt="auto" rotation-per-pixel="1.5" camera-orbit="35deg 45deg auto" shadow-intensity="0.8" exposure="1.1"></model-viewer>
               </div>
-              <div class="map-legend"><span><i class="legend-dot moisture-legend"></i>ความชื้นดิน <strong>4 ระดับ · 5–20 cm</strong></span><span><i class="legend-dot chemistry-legend"></i>ค่า NPK + pH <strong>1 ชุด</strong></span></div>
+              <p class="model-hint">ลากบนโมเดลเพื่อหมุน · ใช้ล้อเมาส์หรือบีบนิ้วเพื่อซูม</p>
             </article>
 
-            <article class="panel chart-panel" id="history">
-              <div class="panel-heading"><div><div class="panel-kicker">SOIL MOISTURE HISTORY</div><h2>แนวโน้มความชื้นดิน</h2></div><select id="chart-range" aria-label="เลือกช่วงเวลา"><option value="1">60 นาที</option><option value="6">6 ชั่วโมง</option></select></div>
-              <div class="chart-legend"><span><i class="legend-line line-one"></i>5 cm</span><span><i class="legend-line line-two"></i>10 cm</span><span><i class="legend-line line-three"></i>15 cm</span><span><i class="legend-line line-four"></i>20 cm</span></div>
-              <div class="chart-wrap"><div class="chart-y-labels" aria-hidden="true"><span>100%</span><span>75%</span><span>50%</span><span>25%</span><span>0%</span></div><canvas id="moisture-chart" aria-label="กราฟประวัติความชื้นดินทั้งสี่จุด"></canvas></div>
-              <div class="chart-x-labels" id="chart-x-labels" aria-hidden="true"><span>60 นาทีที่แล้ว</span><span>45 นาที</span><span>30 นาที</span><span>15 นาที</span><span>ตอนนี้</span></div>
-              <div class="chart-footer"><span class="chart-footer-dot"></span><span id="chart-status">กำลังแสดงข้อมูลตัวอย่าง</span><span class="chart-updated" id="last-updated">อัปเดตเมื่อ --:--:--</span></div>
+            <article class="panel device-panel" id="devices">
+              <div class="panel-heading">
+                <div><div class="panel-kicker">PROJECT EQUIPMENT</div><h2>แนะนำอุปกรณ์ในโครงงาน</h2></div>
+                <span class="device-count">พร้อมแล้ว 3 / 3</span>
+              </div>
+              <div class="device-list">
+                <article class="device-card device-card-ready">
+                  <button class="device-card-open" id="open-arduino-guide" type="button" aria-haspopup="dialog" aria-label="ดูหลักการทำงานของ Arduino UNO R4 WiFi">
+                    <span class="device-image-wrap"><img src="./images/arduino-uno-r4-wifi.png" alt="บอร์ด Arduino UNO R4 WiFi" /><span class="device-open-hint">กดเพื่อดูหลักการทำงาน <span aria-hidden="true">↗</span></span></span>
+                    <span class="device-card-copy"><span class="device-card-label">บอร์ดควบคุมและสื่อสาร</span><strong>Arduino UNO R4 WiFi</strong><small>อ่านค่าจากหัววัด ประมวลผล และส่งข้อมูลผ่าน Wi-Fi</small></span>
+                  </button>
+                </article>
+                <article class="device-card device-card-ready">
+                  <button class="device-card-open" id="open-moisture-guide" type="button" aria-haspopup="dialog" aria-label="ดูหลักการทำงานของ Soil Moisture Sensor and Module">
+                    <span class="device-image-wrap"><img src="./images/soil-moisture-sensor-module.png" alt="หัววัดความชื้นดินแบบแถบโลหะพร้อมโมดูลสีน้ำเงิน" /><span class="device-open-hint">กดเพื่อดูหลักการทำงาน <span aria-hidden="true">↗</span></span></span>
+                    <span class="device-card-copy"><span class="device-card-label">หัววัดความชื้นดิน</span><strong>Soil Moisture Sensor &amp; Module</strong><small>ตรวจความชื้นจากการนำไฟฟ้าระหว่างขั้ววัดในดิน</small></span>
+                  </button>
+                </article>
+                <article class="device-card device-card-ready">
+                  <button class="device-card-open" id="open-npk-ph-guide" type="button" aria-haspopup="dialog" aria-label="ดูหลักการทำงานของ NPK+pH Sensor">
+                    <span class="device-image-wrap"><img src="./images/npk-ph-sensor.png" alt="หัววัด NPK และ pH แบบแท่งโลหะ" /><span class="device-open-hint">กดเพื่อดูหลักการทำงาน <span aria-hidden="true">↗</span></span></span>
+                    <span class="device-card-copy"><span class="device-card-label">หัววัดธาตุอาหารและ pH</span><strong>NPK+pH Sensor</strong><small>ตรวจค่าธาตุอาหาร N · P · K และความเป็นกรด–ด่างของดิน</small></span>
+                  </button>
+                </article>
+              </div>
             </article>
           </section>
 
           <section class="panel soil-advice-panel" id="soil-advice">
             <div class="panel-heading advice-heading"><div><div class="panel-kicker">SOIL TEST & PRACTICAL ADVICE</div><h2>อ่านค่าสภาพดินและแนวทางแก้ไข</h2></div><span class="advice-badge">คำแนะนำทั่วไป · ไม่ระบุอัตราปุ๋ย</span></div>
+            <div class="soil-assessment-summary" id="soil-assessment-summary" data-state="waiting" aria-live="polite">
+              <div class="soil-assessment-heading"><strong id="soil-assessment-status">รอข้อมูลจากเซ็นเซอร์</strong><span id="soil-assessment-source">ยังไม่มีข้อมูล</span></div>
+              <p id="soil-assessment-text">เมื่อได้รับข้อมูล ระบบจะแสดงผลประเมินเบื้องต้นและสิ่งที่ควรตรวจสอบ</p>
+              <ul id="soil-assessment-actions"><li>คำแนะนำ NPK ต้องทราบรุ่นและหน่วยของเซ็นเซอร์ก่อน</li></ul>
+            </div>
             <div class="ph-advice-card">
               <div class="ph-advice-value"><span class="advice-mini-icon ph-mini">pH</span><span><strong>ความเป็นกรด–ด่าง</strong><small>ค่าเซ็นเซอร์ปัจจุบัน: <b id="advice-ph-value">--.-</b></small></span><span class="advice-status" id="advice-ph-status">รอข้อมูล</span></div>
               <p id="advice-ph-text">pH ช่วยชี้เบื้องต้นเรื่องความเป็นกรด–ด่าง ควรตรวจยืนยันด้วยชุดตรวจหรือห้องปฏิบัติการก่อนปรับดิน</p>
             </div>
             <div class="npk-advice-grid">
-              <article class="npk-advice-card" data-nutrient="n"><div class="npk-advice-title"><span class="advice-mini-icon n-mini">N</span><div><strong>ไนโตรเจน (N)</strong><small id="raw-n-value">ค่าจากบอร์ด: -- · ยังไม่ทราบหน่วย</small></div></div><label class="sr-only" for="status-n">สถานะไนโตรเจนจากผลตรวจดิน</label><select class="nutrient-status-select" id="status-n"><option value="unknown">ยังไม่ทราบ</option><option value="low">ผลตรวจระบุว่าต่ำ</option><option value="adequate">อยู่ในเกณฑ์</option><option value="high">ผลตรวจระบุว่าสูง</option></select><p class="npk-advice-text" id="advice-n-text"></p></article>
-              <article class="npk-advice-card" data-nutrient="p"><div class="npk-advice-title"><span class="advice-mini-icon p-mini">P</span><div><strong>ฟอสฟอรัส (P)</strong><small id="raw-p-value">ค่าจากบอร์ด: -- · ยังไม่ทราบหน่วย</small></div></div><label class="sr-only" for="status-p">สถานะฟอสฟอรัสจากผลตรวจดิน</label><select class="nutrient-status-select" id="status-p"><option value="unknown">ยังไม่ทราบ</option><option value="low">ผลตรวจระบุว่าต่ำ</option><option value="adequate">อยู่ในเกณฑ์</option><option value="high">ผลตรวจระบุว่าสูง</option></select><p class="npk-advice-text" id="advice-p-text"></p></article>
-              <article class="npk-advice-card" data-nutrient="k"><div class="npk-advice-title"><span class="advice-mini-icon k-mini">K</span><div><strong>โพแทสเซียม (K)</strong><small id="raw-k-value">ค่าจากบอร์ด: -- · ยังไม่ทราบหน่วย</small></div></div><label class="sr-only" for="status-k">สถานะโพแทสเซียมจากผลตรวจดิน</label><select class="nutrient-status-select" id="status-k"><option value="unknown">ยังไม่ทราบ</option><option value="low">ผลตรวจระบุว่าต่ำ</option><option value="adequate">อยู่ในเกณฑ์</option><option value="high">ผลตรวจระบุว่าสูง</option></select><p class="npk-advice-text" id="advice-k-text"></p></article>
+              <article class="npk-advice-card" data-nutrient="n"><div class="npk-advice-title"><span class="advice-mini-icon n-mini">N</span><div><strong>ไนโตรเจน (N)</strong><small id="raw-n-value">ค่าจากบอร์ด: -- · ยังไม่ทราบหน่วย</small></div></div><label class="sr-only" for="status-n">สถานะไนโตรเจนจากผลตรวจดิน</label><select class="nutrient-status-select" id="status-n"><option value="unknown">ยังไม่ทราบ</option><option value="low">ผลตรวจระบุว่าต่ำ</option><option value="adequate">อยู่ในเกณฑ์</option><option value="high">ผลตรวจระบุว่าสูง</option></select><small class="npk-input-hint">เลือกสถานะจากผลตรวจดิน ไม่ใช่ค่าดิบจากเซ็นเซอร์</small><p class="npk-advice-text" id="advice-n-text"></p></article>
+              <article class="npk-advice-card" data-nutrient="p"><div class="npk-advice-title"><span class="advice-mini-icon p-mini">P</span><div><strong>ฟอสฟอรัส (P)</strong><small id="raw-p-value">ค่าจากบอร์ด: -- · ยังไม่ทราบหน่วย</small></div></div><label class="sr-only" for="status-p">สถานะฟอสฟอรัสจากผลตรวจดิน</label><select class="nutrient-status-select" id="status-p"><option value="unknown">ยังไม่ทราบ</option><option value="low">ผลตรวจระบุว่าต่ำ</option><option value="adequate">อยู่ในเกณฑ์</option><option value="high">ผลตรวจระบุว่าสูง</option></select><small class="npk-input-hint">เลือกสถานะจากผลตรวจดิน ไม่ใช่ค่าดิบจากเซ็นเซอร์</small><p class="npk-advice-text" id="advice-p-text"></p></article>
+              <article class="npk-advice-card" data-nutrient="k"><div class="npk-advice-title"><span class="advice-mini-icon k-mini">K</span><div><strong>โพแทสเซียม (K)</strong><small id="raw-k-value">ค่าจากบอร์ด: -- · ยังไม่ทราบหน่วย</small></div></div><label class="sr-only" for="status-k">สถานะโพแทสเซียมจากผลตรวจดิน</label><select class="nutrient-status-select" id="status-k"><option value="unknown">ยังไม่ทราบ</option><option value="low">ผลตรวจระบุว่าต่ำ</option><option value="adequate">อยู่ในเกณฑ์</option><option value="high">ผลตรวจระบุว่าสูง</option></select><small class="npk-input-hint">เลือกสถานะจากผลตรวจดิน ไม่ใช่ค่าดิบจากเซ็นเซอร์</small><p class="npk-advice-text" id="advice-k-text"></p></article>
             </div>
             <div class="advice-safety-note"><span>!</span><p><strong>ก่อนปรับ pH หรือใส่ปุ๋ย:</strong> ค่า NPK จากโมดูลแต่ละรุ่นอาจใช้หน่วย/วิธีวัดต่างกัน จึงไม่จัดประเภทขาด–เกินจากตัวเลขเซ็นเซอร์เพียงอย่างเดียว เลือกสถานะ N/P/K จากผลวิเคราะห์ดินและคำแนะนำสำหรับพันธุ์ข้าวกับพื้นที่ของคุณ ห้ามคำนวณอัตราปูนหรือปุ๋ยจากค่าเหล่านี้โดยตรง ค่าเตือนความชื้น 35% เป็นเกณฑ์ตัวอย่าง ต้องปรับตามการสอบเทียบหัววัดและสภาพดิน</p></div>
           </section>
@@ -170,10 +180,97 @@
             </div>
             <div class="readings-footer"><span id="readings-count">แสดงเซ็นเซอร์ 5 ชุด</span><span>เช็กการปรับเทียบหัววัดตามคำแนะนำผู้ผลิต</span></div>
           </section>
-          <footer class="page-footer"><span><span class="footer-mark">◈</span> นาฉัน <span class="footer-divider">·</span> ระบบติดตามสภาพดินในนาข้าว</span><span>ข้อมูลสาธิตไม่ใช่คำแนะนำการใส่ปุ๋ย</span></footer>
+          <footer class="page-footer"><span><span class="footer-mark">◈</span> โรงเรียนกงไกรลาศวิทยา <span class="footer-divider">·</span> ระบบติดตามสภาพดินในนาข้าว</span><span>ข้อมูลสาธิตไม่ใช่คำแนะนำการใส่ปุ๋ย</span></footer>
         </div>
       </main>
     </div>
     <div class="toast-region" id="toast-region" aria-live="polite" aria-atomic="true"></div>
+    <dialog class="device-dialog" id="device-dialog" aria-labelledby="device-dialog-title">
+      <div class="device-dialog-header">
+        <div><div class="panel-kicker">อุปกรณ์ตัวที่ 1 จาก 3</div><h2 id="device-dialog-title">Arduino UNO R4 WiFi</h2></div>
+        <button class="device-dialog-close" id="close-device-dialog" type="button" aria-label="ปิดคำอธิบาย">×</button>
+      </div>
+      <p class="device-dialog-badge">บอร์ดควบคุมและสื่อสาร · ไม่ใช่หัววัดดิน</p>
+      <div class="device-dialog-visual"><span>DEVICE PREVIEW</span><img src="./images/arduino-uno-r4-wifi.png" alt="ภาพขยายบอร์ด Arduino UNO R4 WiFi" /></div>
+      <div class="device-dialog-body">
+        <section>
+          <h3>หลักการทำงาน</h3>
+          <ol class="device-steps">
+            <li><strong>รับสัญญาณจากหัววัด</strong><span>หัววัดส่งสัญญาณเข้าขาอินพุตของบอร์ด เช่น ขา A0 สำหรับสัญญาณแอนะล็อก</span></li>
+            <li><strong>ประมวลผลบน RA4M1</strong><span>ไมโครคอนโทรลเลอร์อ่านสัญญาณและคำนวณตามโปรแกรมที่เขียนไว้ เช่น ปรับเทียบค่าแห้ง–เปียก</span></li>
+            <li><strong>ส่งข้อมูลด้วย ESP32-S3</strong><span>ชิปสื่อสารในบอร์ดรองรับ Wi-Fi และ Bluetooth®; โครงงานนี้ใช้ Wi-Fi ส่งข้อมูลไปยังเว็บเซิร์ฟเวอร์</span></li>
+            <li><strong>แสดงผลบนหน้าเว็บ</strong><span>เซิร์ฟเวอร์รับข้อมูลที่บอร์ดส่ง แล้วหน้าแดชบอร์ดนำไปแสดงผล</span></li>
+          </ol>
+        </section>
+        <section class="device-project-example">
+          <h3>ตัวอย่างที่ใช้ในโครงงานนี้</h3>
+          <p>โปรแกรมอ่านหัววัดความชื้นที่ A0 เฉลี่ย 10 ครั้ง แล้วแปลงค่าดิบเป็นเปอร์เซ็นต์ตามค่าปรับเทียบที่กำหนด ก่อนส่งข้อมูลทุก 5 วินาทีผ่าน Wi-Fi</p>
+          <p><strong>ข้อควรรู้:</strong> ขณะทดสอบหัววัดความชื้นเพียงตัวเดียว ระบบส่งค่าความชื้นจริงซ้ำ 4 ช่องเพื่อให้ตรงกับรูปแบบหน้าเว็บ ส่วน pH และ NPK ในโค้ดปัจจุบันเป็นค่าตัวอย่าง ยังไม่ใช่ผลวัดจริง</p>
+        </section>
+        <div class="device-specs" aria-label="ข้อมูลบอร์ดโดยย่อ">
+          <span><strong>RA4M1</strong> ไมโครคอนโทรลเลอร์ 48 MHz</span>
+          <span><strong>ESP32-S3</strong> Wi-Fi และ Bluetooth®</span>
+        </div>
+        <a class="device-source-link" href="https://docs.arduino.cc/hardware/uno-r4-wifi/" target="_blank" rel="noopener noreferrer">ดูข้อมูลทางเทคนิคจาก Arduino ↗</a>
+      </div>
+    </dialog>
+    <dialog class="device-dialog" id="moisture-dialog" aria-labelledby="moisture-dialog-title">
+      <div class="device-dialog-header">
+        <div><div class="panel-kicker">อุปกรณ์ตัวที่ 2 จาก 3</div><h2 id="moisture-dialog-title">Soil Moisture Sensor &amp; Module</h2></div>
+        <button class="device-dialog-close" type="button" aria-label="ปิดคำอธิบาย">×</button>
+      </div>
+      <p class="device-dialog-badge">หัววัดแบบความต้านทาน · ใช้วัดความชื้นดินโดยประมาณ</p>
+      <div class="device-dialog-visual"><span>DEVICE PREVIEW</span><img src="./images/soil-moisture-sensor-module.png" alt="ภาพขยาย Soil Moisture Sensor & Module" /></div>
+      <div class="device-dialog-body">
+        <section>
+          <h3>หลักการทำงาน</h3>
+          <ol class="device-steps">
+            <li><strong>ขั้วโลหะสัมผัสดิน</strong><span>แถบโลหะสองข้างทำหน้าที่เป็นขั้ววัด กระแสไฟฟ้าขนาดเล็กไหลผ่านดินระหว่างขั้ว</span></li>
+            <li><strong>ความชื้นเปลี่ยนการนำไฟฟ้า</strong><span>โดยทั่วไปดินที่ชื้นขึ้นนำไฟฟ้าได้ดีขึ้น ทำให้ความต้านทานระหว่างขั้วลดลง และสัญญาณที่อ่านได้เปลี่ยนไป</span></li>
+            <li><strong>โมดูลส่งสัญญาณให้บอร์ด</strong><span>ขา AO ส่งค่าระดับแอนะล็อกให้ Arduino อ่านและประมวลผล ส่วนขา DO ให้สัญญาณดิจิทัลตามเกณฑ์ที่ปรับด้วยตัวต้านทานปรับค่าได้บนโมดูล</span></li>
+          </ol>
+        </section>
+        <section class="device-project-example">
+          <h3>การต่อและใช้งานในโครงงานนี้</h3>
+          <p>ต่อ AO เข้าขา A0, GND เข้ากับ GND และจ่าย VCC ตามแรงดันที่ระบุของโมดูล โดยโปรแกรมอ่านค่าจาก A0 หลายครั้งแล้วเฉลี่ย ก่อนปรับเทียบค่าดินแห้งและดินเปียกให้เป็นเปอร์เซ็นต์ความชื้นโดยประมาณ</p>
+          <p><strong>ข้อควรรู้:</strong> ค่าดิบไม่ใช่เปอร์เซ็นต์ความชื้นมาตรฐาน และอาจเปลี่ยนตามชนิดดิน ความเค็ม ปุ๋ย แรงดันจ่าย และตำแหน่งติดตั้ง ควรสอบเทียบในดินของแปลงจริง ขั้วโลหะอาจสึกกร่อนเมื่อจ่ายไฟค้างหรือใช้งานในดินชื้นนาน ๆ</p>
+        </section>
+        <div class="device-specs" aria-label="สัญญาณจากโมดูล">
+          <span><strong>AO · Analog Output</strong>ค่าต่อเนื่องสำหรับอ่านด้วยขาแอนะล็อก</span>
+          <span><strong>DO · Digital Output</strong>สถานะตามจุดตัดที่ปรับบนโมดูล</span>
+        </div>
+        <a class="device-source-link" href="https://learn.sparkfun.com/tutorials/soil-moisture-sensor-hookup-guide/all" target="_blank" rel="noopener noreferrer">อ่านหลักการวัดและการใช้งานเพิ่มเติม ↗</a>
+      </div>
+    </dialog>
+    <dialog class="device-dialog" id="npk-ph-dialog" aria-labelledby="npk-ph-dialog-title">
+      <div class="device-dialog-header">
+        <div><div class="panel-kicker">อุปกรณ์ตัวที่ 3 จาก 3</div><h2 id="npk-ph-dialog-title">NPK+pH Sensor</h2></div>
+        <button class="device-dialog-close" type="button" aria-label="ปิดคำอธิบาย">×</button>
+      </div>
+      <p class="device-dialog-badge">หัววัดธาตุอาหาร N · P · K และความเป็นกรด–ด่างของดิน</p>
+      <div class="device-dialog-visual"><span>DEVICE PREVIEW</span><img src="./images/npk-ph-sensor.png" alt="ภาพขยายหัววัด NPK และ pH" /></div>
+      <div class="device-dialog-body">
+        <section>
+          <h3>หลักการทำงาน</h3>
+          <ol class="device-steps">
+            <li><strong>ปักหัววัดลงในดิน</strong><span>แท่งโลหะสัมผัสดินเพื่อเก็บสัญญาณจากบริเวณที่ต้องการตรวจ ควรเลือกจุดที่ไม่มีหินและติดตั้งตามคู่มือของรุ่นนั้น</span></li>
+            <li><strong>อ่านค่า pH และธาตุอาหาร</strong><span>วงจรในหัววัดประเมินค่า pH และ N (ไนโตรเจน), P (ฟอสฟอรัส), K (โพแทสเซียม) แล้วส่งค่าให้บอร์ด โดยวิธีวัด หน่วย และความแม่นยำขึ้นกับรุ่น</span></li>
+            <li><strong>ส่งข้อมูลให้บอร์ด</strong><span>บางรุ่นใช้ RS485/Modbus แทนสัญญาณแอนะล็อก จึงต้องใช้วงจรแปลงสัญญาณที่เหมาะสมและอ่านรูปแบบข้อมูลตามคู่มือ ไม่ควรต่อสายเข้าขา A0 โดยคาดเดา</span></li>
+          </ol>
+        </section>
+        <section class="device-project-example">
+          <h3>การใช้งานในโครงงานนี้</h3>
+          <p>แดชบอร์ดรองรับช่องข้อมูล pH, N, P และ K อยู่แล้ว แต่ขณะนี้แสดงเฉพาะค่าที่บอร์ดส่งมา ไม่ได้อ่านเซ็นเซอร์นี้โดยตรง ต้องตรวจรุ่น แรงดันไฟเลี้ยง อินเทอร์เฟซ และหน่วยในคู่มือก่อนต่อเข้ากับ Arduino UNO R4 WiFi</p>
+          <p><strong>ข้อควรรู้:</strong> เซ็นเซอร์ NPK แบบ RS485 บางรุ่นรายงาน N/P/K เป็น mg/kg แต่ห้ามนำหน่วยหรือสเปกนั้นไปใช้กับหัววัดในภาพโดยยังไม่ทราบรุ่น ควรสอบเทียบ pH ตามคู่มือ และใช้ค่าจากหัววัดเป็นข้อมูลอ้างอิง ไม่ใช้ตัดสินอัตราปุ๋ยหรือปูนโดยตรง</p>
+        </section>
+        <div class="device-specs" aria-label="ค่าที่ตรวจวัด">
+          <span><strong>N · Nitrogen</strong>ไนโตรเจน · หน่วยตามคู่มือเซ็นเซอร์</span>
+          <span><strong>P · Phosphorus</strong>ฟอสฟอรัส · หน่วยตามคู่มือเซ็นเซอร์</span>
+          <span><strong>K · Potassium</strong>โพแทสเซียม · หน่วยตามคู่มือเซ็นเซอร์</span>
+          <span><strong>pH</strong>ความเป็นกรด–ด่าง · ควรสอบเทียบตามคู่มือ</span>
+        </div>
+        <a class="device-source-link" href="https://wiki.dfrobot.com/SEN0605" target="_blank" rel="noopener noreferrer">ข้อมูลอ้างอิง: ตัวอย่างเซ็นเซอร์ NPK แบบ RS485 จาก DFRobot (ไม่ใช่รุ่น pH ในภาพ) ↗</a>
+      </div>
+    </dialog>
   </body>
 </html>

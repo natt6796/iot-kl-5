@@ -1,27 +1,29 @@
 (() => {
   "use strict";
 
-  const MAX_HISTORY = 120;
   const STALE_AFTER_MS = 30_000;
   const MIN_MOISTURE = 35;
   const MOISTURE_DEPTHS_CM = [5, 10, 15, 20];
+  const API_BASE = window.location.port === "5500"
+    && ["localhost", "127.0.0.1"].includes(window.location.hostname)
+    ? `${window.location.protocol}//${window.location.hostname}:8000`
+    : "";
+  const apiUrl = (path) => `${API_BASE}${path}`;
   const $ = (selector) => document.querySelector(selector);
   const state = {
     reading: null,
-    history: [],
     serialPort: null,
     reader: null,
     readTask: null,
     demoTimer: null,
     mode: "demo",
-    rangeHours: 1,
     lastReadingAt: null,
     connectionStartedAt: null,
     lastWifiReceivedAt: null,
     wifiServerAvailable: false,
+    wifiPollInFlight: false,
     cropStage: null,
   };
-  const colors = ["#e58a42", "#cf9a60", "#bb7047", "#e7b473"];
   const initialDemo = { moisture: [61, 55, 68, 47], ph: 6.4, n: 38, p: 21, k: 67 };
   const stages = {
     seedling: {
@@ -101,11 +103,6 @@
     return Math.max(min, Math.min(max, value));
   }
 
-  function addHistory(reading, time = new Date()) {
-    state.history.push({ time, moisture: [...reading.moisture] });
-    state.history = state.history.slice(-MAX_HISTORY);
-  }
-
   function setConnection(mode, label, detail) {
     state.mode = mode;
     const pill = $("#connection-pill");
@@ -115,7 +112,6 @@
     pill.classList.toggle("error-pill", mode === "error");
     $("#connection-label-status").textContent = label;
     $("#connection-detail").textContent = detail;
-    $("#chart-status").textContent = mode === "demo" ? "กำลังแสดงข้อมูลตัวอย่าง" : mode === "wifi" ? "รับข้อมูลจาก Arduino ผ่าน Wi-Fi" : mode === "connected" ? "รับข้อมูลจาก Arduino ผ่าน Serial" : "รอข้อมูลจากบอร์ด";
     $("#connect-label").textContent = mode === "connected" ? "ตัด USB" : "เชื่อมต่อ USB";
     $("#connect-serial").classList.toggle("connected", mode === "connected");
   }
@@ -170,11 +166,9 @@
     $("#online-note").textContent = state.mode === "demo" ? "ข้อมูลจำลอง 5 เซ็นเซอร์" : state.mode === "wifi" ? "รับข้อมูลผ่าน Wi-Fi" : "ได้รับข้อมูลจากบอร์ดล่าสุด";
     $("#online-meter-fill").style.width = "100%";
     $("#alert-time").textContent = `อัปเดตล่าสุด ${formatTime(receivedAt)}`;
-    $("#last-updated").textContent = `อัปเดตเมื่อ ${formatTime(receivedAt)}`;
     $("#readings-count").textContent = "แสดงเซ็นเซอร์ 5 ชุด";
     reading.moisture.forEach((value, index) => {
       const point = index + 1;
-      $(`#map-moisture-${point}`).textContent = `${Math.round(value)}%`;
       $(`#reading-moisture-${point}`).textContent = Math.round(value);
       $(`#reading-time-${point}`).textContent = formatTime(receivedAt);
       const card = document.querySelector(`[data-reading="moisture-${point}"]`);
@@ -182,15 +176,10 @@
       card.querySelector(".reading-status").textContent = value < MIN_MOISTURE ? "ค่าต่ำ" : "ออนไลน์";
       card.querySelector(".reading-status").classList.remove("offline");
       card.querySelector(".reading-status").classList.toggle("low", value < MIN_MOISTURE);
-      const marker = document.querySelector(`[data-sensor="moisture-${point}"]`);
-      marker.classList.toggle("dry-marker", value < MIN_MOISTURE);
     });
-    $("#map-chemistry").textContent = `N ${Math.round(reading.n)} · P ${Math.round(reading.p)}`;
-    $("#map-ph").textContent = `K ${Math.round(reading.k)} · pH ${reading.ph.toFixed(1)}`;
     $("#reading-time-ph").textContent = formatTime(receivedAt);
     renderNotice(reading);
     renderSoilAdvice(reading);
-    drawChart(Date.now());
   }
 
   function renderSoilAdvice(reading) {
@@ -212,6 +201,61 @@
     }
     $("#advice-ph-status").textContent = status;
     $("#advice-ph-text").textContent = advice;
+    renderSoilAssessment(reading);
+  }
+
+  function renderSoilAssessment(reading) {
+    const summary = $("#soil-assessment-summary");
+    const title = $("#soil-assessment-status");
+    const source = $("#soil-assessment-source");
+    const text = $("#soil-assessment-text");
+    const actions = $("#soil-assessment-actions");
+    const averageMoisture = reading.moisture.reduce((sum, value) => sum + value, 0) / reading.moisture.length;
+    const lowDepths = reading.moisture
+      .map((value, index) => value < MIN_MOISTURE ? MOISTURE_DEPTHS_CM[index] : null)
+      .filter((depth) => depth !== null);
+    const highDepths = reading.moisture
+      .map((value, index) => value > 85 ? MOISTURE_DEPTHS_CM[index] : null)
+      .filter((depth) => depth !== null);
+    const moistureHigh = averageMoisture > 85 || highDepths.length > 0;
+    const phOutsideReference = reading.ph < 5.5 || reading.ph > 6.5;
+    const demo = state.mode === "demo";
+    const needsReview = lowDepths.length > 0 || moistureHigh || phOutsideReference;
+
+    summary.dataset.state = demo ? "demo" : needsReview ? "caution" : "monitor";
+    title.textContent = demo
+      ? "ข้อมูลตัวอย่าง · ยังไม่ใช่ผลวัดจริง"
+      : needsReview ? "ควรตรวจสอบเพิ่มเติม" : "ติดตามต่อ · NPK รอยืนยันหน่วย";
+    source.textContent = demo ? "โหมดสาธิต" : state.mode === "wifi" ? "รับข้อมูลผ่าน Wi-Fi" : "รับข้อมูลจากบอร์ด";
+    text.textContent = demo
+      ? "ค่าที่เห็นเป็นข้อมูลจำลอง ใช้ดูรูปแบบการประเมินเท่านั้น เมื่อเชื่อมต่อเซ็นเซอร์จริง ระบบจะประเมินจากค่าที่บอร์ดส่งมา"
+      : "ประเมินเบื้องต้นจาก pH และความชื้นที่รับได้ ส่วนค่า NPK แสดงตามข้อมูลจากบอร์ด แต่ยังจัดระดับต่ำ/ปกติ/สูงไม่ได้เพราะไม่ทราบรุ่นและหน่วย";
+
+    const recommendations = [];
+    if (lowDepths.length > 0) {
+      recommendations.push(`ความชื้นต่ำกว่าเกณฑ์ตัวอย่างที่ระดับ ${lowDepths.join(", ")} cm: ตรวจระดับน้ำและตำแหน่งหัววัดในแปลงก่อนปรับการให้น้ำ`);
+    }
+    if (highDepths.length > 0 || averageMoisture > 85) {
+      recommendations.push(`ความชื้นสูงกว่าเกณฑ์ตัวอย่าง${highDepths.length ? `ที่ระดับ ${highDepths.join(", ")} cm` : ""}: ตรวจระดับน้ำ การระบายน้ำ และการสอบเทียบหัววัด`);
+    }
+    if (lowDepths.length === 0 && !moistureHigh) {
+      recommendations.push("ความชื้นยังไม่ต่ำกว่าเกณฑ์ตัวอย่าง 35% และค่าเฉลี่ยไม่สูงกว่า 85%; ปรับเกณฑ์ตามการสอบเทียบและวิธีจัดการน้ำในแปลง");
+    }
+
+    if (reading.ph < 5.5) {
+      recommendations.push("pH ค่อนข้างเป็นกรด: ตรวจยืนยันด้วยวิธีมาตรฐานและผลความต้องการปูนก่อนปรับดิน");
+    } else if (reading.ph > 6.5) {
+      recommendations.push("pH สูงกว่าช่วงอ้างอิงทั่วไป: ตรวจซ้ำและปรึกษาหน่วยงานดินก่อนใช้วัสดุปรับ pH");
+    } else {
+      recommendations.push("pH อยู่ในช่วงอ้างอิงทั่วไปสำหรับข้าว; ติดตามต่อและไม่ปรับดินหากไม่มีผลตรวจรองรับ");
+    }
+
+    recommendations.push(`ค่า N/P/K ที่อ่านได้คือ ${Math.round(reading.n)} / ${Math.round(reading.p)} / ${Math.round(reading.k)} แต่ยังไม่ทราบหน่วย: ตรวจรุ่น/คู่มือหรือผลวิเคราะห์ดินก่อนตัดสินใจใส่ปุ๋ย`);
+    actions.replaceChildren(...recommendations.map((recommendation) => {
+      const item = document.createElement("li");
+      item.textContent = recommendation;
+      return item;
+    }));
   }
 
   function renderStageGuidance(stageKey) {
@@ -266,6 +310,8 @@
   }
 
   function showStageGate() {
+    $("#stage-gate").classList.remove("is-departing");
+    $("#app-shell").classList.remove("dashboard-arriving");
     $("#planting-date").value = plantingDate || "";
     $("#date-error").hidden = true;
     $("#cancel-date-edit").hidden = !plantingDate;
@@ -274,6 +320,35 @@
     $("#app-shell").hidden = true;
     window.scrollTo(0, 0);
     $("#planting-date").focus();
+  }
+
+  function enterDashboard() {
+    const gate = $("#stage-gate");
+    const appShell = $("#app-shell");
+    appShell.hidden = false;
+    window.scrollTo(0, 0);
+
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      gate.hidden = true;
+      return;
+    }
+
+    gate.classList.remove("is-departing");
+    appShell.classList.remove("dashboard-arriving");
+    void gate.offsetWidth;
+    gate.classList.add("is-departing");
+    appShell.classList.add("dashboard-arriving");
+
+    const finishTransition = (event) => {
+      if (event && event.target !== gate) return;
+      gate.removeEventListener("animationend", finishTransition);
+      window.clearTimeout(transitionFallback);
+      gate.hidden = true;
+      gate.classList.remove("is-departing");
+      appShell.classList.remove("dashboard-arriving");
+    };
+    const transitionFallback = window.setTimeout(() => finishTransition(), 1200);
+    gate.addEventListener("animationend", finishTransition);
   }
 
   function savePlantingDate() {
@@ -299,9 +374,7 @@
     }
     plantingDate = value;
     updateCropStage();
-    $("#stage-gate").hidden = true;
-    $("#app-shell").hidden = false;
-    window.scrollTo(0, 0);
+    enterDashboard();
   }
 
   function updateCropStage() {
@@ -336,15 +409,24 @@
     $("#moisture-summary-note").textContent = "รอข้อมูลจากบอร์ด";
     $("#soil-ph").textContent = "--.-";
     $("#ph-note").textContent = "รอข้อมูลจากบอร์ด";
+    $("#advice-ph-value").textContent = "--.-";
+    $("#advice-ph-status").textContent = "รอข้อมูล";
+    $("#advice-ph-text").textContent = "รอข้อมูลจากเซ็นเซอร์";
     $("#nitrogen").textContent = "--";
     $("#phosphorus").textContent = "--";
     $("#potassium").textContent = "--";
+    $("#raw-n-value").textContent = "ค่าจากบอร์ด: -- · ยังไม่ทราบหน่วย";
+    $("#raw-p-value").textContent = "ค่าจากบอร์ด: -- · ยังไม่ทราบหน่วย";
+    $("#raw-k-value").textContent = "ค่าจากบอร์ด: -- · ยังไม่ทราบหน่วย";
+    $("#soil-assessment-summary").dataset.state = "waiting";
+    $("#soil-assessment-status").textContent = "รอข้อมูลจากเซ็นเซอร์";
+    $("#soil-assessment-source").textContent = "ยังไม่มีข้อมูล";
+    $("#soil-assessment-text").textContent = "เมื่อได้รับข้อมูล ระบบจะแสดงผลประเมินเบื้องต้นและสิ่งที่ควรตรวจสอบ";
+    $("#soil-assessment-actions").replaceChildren();
     $("#reading-ph").textContent = "--.-";
     $("#reading-n").textContent = "--";
     $("#reading-p").textContent = "--";
     $("#reading-k").textContent = "--";
-    $("#map-chemistry").textContent = "N -- · P --";
-    $("#map-ph").textContent = "K -- · pH --.-";
     $("#online-count").textContent = "00";
     $("#online-note").textContent = "รอข้อมูล JSON จากบอร์ด";
     $("#online-meter-fill").style.width = "0%";
@@ -352,7 +434,6 @@
     $("#alert-title").textContent = "กำลังรอข้อมูลจาก Arduino";
     $("#alert-detail").textContent = "ส่ง JSON หนึ่งบรรทัดต่อชุดข้อมูลผ่าน Serial เพื่อเริ่มติดตาม";
     $("#alert-time").textContent = "ยังไม่มีข้อมูล";
-    $("#last-updated").textContent = "อัปเดตเมื่อ --:--:--";
     document.querySelectorAll(".reading-card").forEach((card) => {
       const status = card.querySelector(".reading-status");
       status.textContent = "รอข้อมูล";
@@ -368,52 +449,9 @@
       });
     });
     for (let point = 1; point <= 4; point += 1) {
-      $(`#map-moisture-${point}`).textContent = "--%";
       $(`#reading-moisture-${point}`).textContent = "--";
-      document.querySelector(`[data-sensor="moisture-${point}"]`).classList.remove("dry-marker");
     }
     $("#reading-ph").textContent = "--.-";
-    drawChart(Date.now());
-  }
-
-  function drawChart(now) {
-    const canvas = $("#moisture-chart");
-    const bounds = canvas.getBoundingClientRect();
-    if (!bounds.width || !bounds.height) return;
-    const ratio = window.devicePixelRatio || 1;
-    canvas.width = Math.round(bounds.width * ratio);
-    canvas.height = Math.round(bounds.height * ratio);
-    const context = canvas.getContext("2d");
-    context.setTransform(ratio, 0, 0, ratio, 0, 0);
-    context.clearRect(0, 0, bounds.width, bounds.height);
-    const rangeMs = state.rangeHours * 60 * 60_000;
-    const start = now - rangeMs;
-    const data = state.history.filter((point) => point.time.getTime() >= start);
-    const plotWidth = bounds.width;
-    const plotHeight = bounds.height;
-    for (let sensorIndex = 0; sensorIndex < 4; sensorIndex += 1) {
-      const points = data.filter((point) => Number.isFinite(point.moisture[sensorIndex]));
-      if (points.length < 2) continue;
-      context.beginPath();
-      points.forEach((point, index) => {
-        const x = clamp((point.time.getTime() - start) / rangeMs, 0, 1) * plotWidth;
-        const y = plotHeight - clamp(point.moisture[sensorIndex], 0, 100) / 100 * plotHeight;
-        if (index === 0) context.moveTo(x, y);
-        else context.lineTo(x, y);
-      });
-      context.strokeStyle = colors[sensorIndex];
-      context.lineWidth = 1.6;
-      context.lineJoin = "round";
-      context.lineCap = "round";
-      context.stroke();
-    }
-    const labelCount = 5;
-    const labels = [];
-    for (let index = 0; index < labelCount; index += 1) {
-      const time = new Date(start + rangeMs * index / (labelCount - 1));
-      labels.push(`<span>${index === labelCount - 1 ? "ตอนนี้" : state.rangeHours === 1 ? formatTime(time).slice(0, 5) : `${time.getHours().toString().padStart(2, "0")}:00`}</span>`);
-    }
-    $("#chart-x-labels").innerHTML = labels.join("");
   }
 
   function makeDemoReading() {
@@ -428,54 +466,57 @@
   }
 
   function startDemo() {
-    state.history = [];
     state.connectionStartedAt = null;
     setConnection("demo", "โหมดตัวอย่าง", "ข้อมูลจำลอง");
-    const time = Date.now();
-    for (let index = 24; index >= 0; index -= 1) {
-      const sample = makeDemoReading();
-      addHistory(sample, new Date(time - index * 2_500));
-    }
     render(makeDemoReading());
     window.clearInterval(state.demoTimer);
     state.demoTimer = window.setInterval(() => {
       if (state.mode !== "demo") return;
       const sample = makeDemoReading();
       const receivedAt = new Date();
-      addHistory(sample, receivedAt);
       render(sample, receivedAt);
     }, 2_500);
   }
 
   async function pollWifi() {
+    if (state.wifiPollInFlight) return;
+    state.wifiPollInFlight = true;
     try {
-      const response = await fetch("/api/latest", { cache: "no-store" });
+      const response = await fetch(apiUrl("/api/latest"), { cache: "no-store" });
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
       const result = await response.json();
+      if (!result || typeof result !== "object" || Array.isArray(result)) {
+        throw new Error("รูปแบบคำตอบจากเซิร์ฟเวอร์ไม่ถูกต้อง");
+      }
+      const reading = result.reading ? validateReading(result.reading) : null;
+      if (result.reading && !Number.isFinite(result.receivedAt)) {
+        throw new Error("ไม่พบเวลาที่รับข้อมูลจากบอร์ด");
+      }
       state.wifiServerAvailable = true;
       if (state.mode === "demo" && state.serialPort === null) {
-        $("#connection-detail").textContent = "Wi-Fi พร้อมรับข้อมูล";
+        $("#connection-detail").textContent = reading
+          ? "เซิร์ฟเวอร์พร้อม · กำลังรอข้อมูล Arduino"
+          : "เซิร์ฟเวอร์พร้อม · เปิด Arduino เพื่อส่งข้อมูล";
       }
-      if (!result.reading || !Number.isFinite(result.receivedAt) || state.mode === "connected") return;
-      if (result.receivedAt === state.lastWifiReceivedAt) return;
+      if (!reading || state.mode === "connected") return;
+      if (result.receivedAt === state.lastWifiReceivedAt && state.mode !== "demo") return;
 
-      const reading = validateReading(result.reading);
       state.lastWifiReceivedAt = result.receivedAt;
       window.clearInterval(state.demoTimer);
       state.demoTimer = null;
       const receivedAt = new Date(result.receivedAt);
-      state.history.push({ time: receivedAt, moisture: [...reading.moisture] });
-      state.history = state.history.slice(-MAX_HISTORY);
       state.connectionStartedAt = result.receivedAt;
       setConnection("wifi", "เชื่อมต่อผ่าน Wi-Fi", window.location.host);
       render(reading, receivedAt);
     } catch (error) {
-      if (state.wifiServerAvailable) {
-        state.wifiServerAvailable = false;
-        if (state.mode === "demo") {
-          $("#connection-detail").textContent = "เปิด server.py เพื่อใช้ Wi-Fi";
-        }
+      state.wifiServerAvailable = false;
+      if (state.mode === "demo" || state.mode === "wifi") {
+        $("#connection-detail").textContent = error instanceof TypeError
+          ? "ยังไม่พบเซิร์ฟเวอร์ · เปิด start_dashboard.bat"
+          : `เซิร์ฟเวอร์/ข้อมูลผิดพลาด · ${error.message}`;
       }
+    } finally {
+      state.wifiPollInFlight = false;
     }
   }
 
@@ -532,9 +573,21 @@
           try {
             const reading = validateReading(JSON.parse(line));
             const receivedAt = new Date();
-            addHistory(reading, receivedAt);
             render(reading, receivedAt);
             setConnection("connected", "เชื่อมต่อ Arduino แล้ว", "Serial · 9600 baud");
+            try {
+              const response = await fetch(apiUrl("/api/telemetry"), {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(reading),
+              });
+              if (!response.ok) {
+                const result = await response.json();
+                throw new Error(result.error || `HTTP ${response.status}`);
+              }
+            } catch (error) {
+              showToast(`แสดงค่าได้ แต่บันทึกประวัติไม่ได้: ${error.message}`, "error");
+            }
           } catch (error) {
             showToast(`ข้ามบรรทัดข้อมูล: ${error.message}`, "error");
           }
@@ -577,7 +630,6 @@
     const port = await navigator.serial.requestPort();
     await port.open({ baudRate: 9600 });
     state.serialPort = port;
-    state.history = [];
     state.connectionStartedAt = Date.now();
     clearReadings();
     window.clearInterval(state.demoTimer);
@@ -608,44 +660,56 @@
     if (state.mode === "demo") {
       const reading = makeDemoReading();
       const time = new Date();
-      addHistory(reading, time);
       render(reading, time);
       showToast("อัปเดตข้อมูลตัวอย่างแล้ว");
     } else {
-      drawChart(Date.now());
       showToast("แสดงข้อมูลล่าสุดแล้ว");
     }
   });
-  $("#chart-range").addEventListener("change", (event) => {
-    state.rangeHours = Number(event.target.value);
-    drawChart(Date.now());
+  const deviceDialogs = document.querySelectorAll(".device-dialog");
+  $("#open-arduino-guide").addEventListener("click", () => $("#device-dialog").showModal());
+  $("#open-moisture-guide").addEventListener("click", () => $("#moisture-dialog").showModal());
+  $("#open-npk-ph-guide").addEventListener("click", () => $("#npk-ph-dialog").showModal());
+  function closeDeviceDialog(dialog) {
+    if (!dialog.open || dialog.classList.contains("is-closing")) return;
+    dialog.classList.add("is-closing");
+    let fallbackTimer;
+    const finishClose = (event) => {
+      if (event && (event.target !== dialog || event.animationName !== "device-dialog-zoom-out")) return;
+      dialog.removeEventListener("animationend", finishClose);
+      window.clearTimeout(fallbackTimer);
+      if (dialog.open) dialog.close();
+      dialog.classList.remove("is-closing");
+    };
+    dialog.addEventListener("animationend", finishClose);
+    fallbackTimer = window.setTimeout(() => finishClose(), 400);
+  }
+  deviceDialogs.forEach((dialog) => {
+    dialog.querySelector(".device-dialog-close").addEventListener("click", () => closeDeviceDialog(dialog));
+    dialog.addEventListener("keydown", (event) => {
+      if (event.key === "Escape") {
+        event.preventDefault();
+        closeDeviceDialog(dialog);
+      }
+    });
+    dialog.addEventListener("cancel", (event) => {
+      event.preventDefault();
+      closeDeviceDialog(dialog);
+    });
+    dialog.addEventListener("click", (event) => {
+      if (event.target === dialog) closeDeviceDialog(dialog);
+    });
   });
   $("#stage-continue").addEventListener("click", savePlantingDate);
   $("#cancel-date-edit").addEventListener("click", () => {
     if (!plantingDate) return;
-    $("#stage-gate").hidden = true;
-    $("#app-shell").hidden = false;
-    window.scrollTo(0, 0);
-    drawChart(Date.now());
+    enterDashboard();
   });
   $("#change-stage").addEventListener("click", showStageGate);
   $("#selected-stage-chip").addEventListener("click", showStageGate);
   ["n", "p", "k"].forEach((nutrient) => {
     $(`#status-${nutrient}`).addEventListener("change", () => updateNutrientAdvice(nutrient));
     updateNutrientAdvice(nutrient);
-  });
-  document.querySelectorAll(".sensor-marker").forEach((marker) => {
-    marker.addEventListener("click", () => {
-      if (!state.reading) {
-        showToast("รอข้อมูลจากเซ็นเซอร์ก่อน");
-        return;
-      }
-      const sensor = marker.dataset.sensor;
-      const message = sensor === "chemistry"
-        ? `N ${Math.round(state.reading.n)} · P ${Math.round(state.reading.p)} · K ${Math.round(state.reading.k)} · pH ${state.reading.ph.toFixed(1)}`
-        : `ความชื้น ${MOISTURE_DEPTHS_CM[Number(sensor.slice(-1)) - 1]} cm: ${Math.round(state.reading.moisture[Number(sensor.slice(-1)) - 1])}%`;
-      showToast(message);
-    });
   });
   window.setInterval(() => {
     if (state.mode !== "connected" && state.mode !== "connecting" && state.mode !== "wifi") return;
@@ -662,7 +726,6 @@
       status.classList.add("offline");
     });
   }, 5_000);
-  window.addEventListener("resize", () => drawChart(Date.now()));
   window.addEventListener("beforeunload", () => {
     if (state.serialPort) state.serialPort.close();
   });
@@ -681,7 +744,6 @@
       updateCropStage();
       $("#stage-gate").hidden = true;
       $("#app-shell").hidden = false;
-      drawChart(Date.now());
     } else {
       showStageGate();
     }

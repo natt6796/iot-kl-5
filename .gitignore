@@ -1,0 +1,4 @@
+__pycache__/
+*.py[cod]
+telemetry.sqlite3
+iot_kl/
