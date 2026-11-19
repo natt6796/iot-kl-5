@@ -4,6 +4,7 @@
 import argparse
 import json
 import math
+import os
 import socket
 import sqlite3
 import threading
@@ -21,7 +22,11 @@ from pydantic import BaseModel, Field, StrictFloat, StrictInt, model_validator
 
 
 ROOT = Path(__file__).resolve().parent
-DATABASE_PATH = ROOT / "telemetry.sqlite3"
+DATABASE_PATH = (
+    Path("/tmp/telemetry.sqlite3")
+    if os.environ.get("VERCEL") == "1"
+    else ROOT / "telemetry.sqlite3"
+)
 MAX_BODY_BYTES = 4096
 MAX_HISTORY_ITEMS = 5000
 
@@ -208,6 +213,9 @@ def create_app(database_path: Path = DATABASE_PATH) -> FastAPI:
     app.mount("/images", StaticFiles(directory=ROOT / "images"), name="images")
     app.mount("/models", StaticFiles(directory=ROOT / "models"), name="models")
     return app
+
+
+app = create_app()
 
 
 def local_addresses():
